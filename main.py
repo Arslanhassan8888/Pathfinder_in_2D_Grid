@@ -22,3 +22,14 @@ class Map:
         # goal at bottom-right
         # In this case have 10 rows and 10 columns so it will be 9,9, as indexing starts from 0 not 1
         self.goal = (rows - 1, cols - 1) 
+
+
+
+if __name__ == "__main__":
+    print("This is Arslan's Land.")
+
+    land1 = Map(10, 10)
+
+    print("Map size:", land1.rows, "x", land1.cols)
+    print("Start:", land1.start)
+    print("Goal:", land1.goal)
