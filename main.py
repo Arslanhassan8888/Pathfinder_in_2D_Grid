@@ -78,6 +78,7 @@ class Map:
                 w_prob = int(w_prob * scale)
                 o_prob = int(o_prob * scale) 
                 
+                
             self.grid = [] # create with an empty list for the grid or reset the grid
             
             # iteration through each row index
@@ -150,7 +151,7 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
-    land1.fill_random_grid()
+    land1.fill_random_grid( n_prob=60, h_prob=20, w_prob=10, o_prob=20)
     
     
     
