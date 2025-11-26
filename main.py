@@ -7,7 +7,10 @@ class Map:
       W = water
       H = hill
     """
-    def __init__(self, rows, cols): # self refere to the object being created, in this case the l object.
+    
+    # -->STEP 1: Initialize the map with rows and columns
+    
+    def __init__(self, rows, cols): # self refer to the object being created, in this case the l object.
         # number of rows and columns
         self.rows = rows
         self.cols = cols
@@ -17,11 +20,14 @@ class Map:
 
         # set start and goal positions and start at top-left
         # This is a tuple with row and column index
-        # tuple is immutable so cannot be changed and keep the same order of values
+        # tuple is immutable so cannot be changed and keep the same order of values,
+        # and also can be used as a key in a dictionary or added to a set,and they  are hashable.
         self.start = (0, 0)
         # goal at bottom-right
         # In this case have 10 rows and 10 columns so it will be 9,9, as indexing starts from 0 not 1
         self.goal = (rows - 1, cols - 1) 
+        
+    #--> STEP 2: Fill the grid with normal terrain 'N'
 
     def fill_grid(self):
             """
@@ -38,8 +44,33 @@ class Map:
                     row_list.append('N') # append 'N' to the row list
                     
                 self.grid.append(row_list) # append the row list to the grid
-                
-                
+     
+    #--> STEP 3: Print the grid to the console
+               
+    def print_grid(self):
+            """
+            Print the grid to the console.
+            Start will be'S' and Goal will be 'G'.
+            """
+            # iterate through each row index
+            for x in range (self.rows):
+                # iterate through each column of the row index
+                for y in range (self.cols):
+                    
+                    # check if the current position is starting position
+                    #x is row index and y is column index
+                    if (x, y) == self.start: 
+                        print('S', end=' ')
+                    # check if the current position is goal position
+                    elif (x, y) == self.goal:
+                        print('G', end=' ')
+                    # else print what else is in the grid at that position, in this will be 'N'
+                    #Then also 'O', 'W' or 'H'
+                    else:
+                        print(self.grid[x][y], end=' ')
+                        
+                print()  # new line after each row
+             
                 
 
 if __name__ == "__main__":
@@ -55,6 +86,5 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
-    print("\nGrid filled with 'N':")
-    for row in land1.grid:
-        print(row)
+    print("\n--- Printing Grid ---")
+    land1.print_grid()
