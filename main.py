@@ -50,7 +50,7 @@ class Map:
     
     #--> STEP 2b: Fill the grid with random terrain types
     
-    def fill_random_grid(self, n_prob = 65, h_prob = 15, w_prob = 15, o_prob = 5):
+    def fill_random_grid(self, n_prob = 65, h_prob = 15, w_prob = 10, o_prob = 10):
             """
             Fill the grid with random terrain:
             - Most cells are 'N'
@@ -58,7 +58,26 @@ class Map:
             - Some cells 'W' (water)
             - Some cells 'H' (hill)
             - Check if start and goal are not obstacles so they are not blocked.
+            - Automatically
             """
+            # check that the probability entered by user
+            total_prob = n_prob + h_prob + w_prob + o_prob
+            
+            # if total not equal to 100, adjust automatically
+            if total_prob != 100:
+                print(f"Probabilities total {total_prob}%. Adjusting automatically to 100%.\n")
+                
+            # declare and calculate scaling factor
+            # this makes sure the total adds up to 100
+            
+                scale = 100 / total_prob
+                
+            # adjust each probability   
+                n_prob = int(n_prob * scale)
+                h_prob = int(h_prob * scale)
+                w_prob = int(w_prob * scale)
+                o_prob = int(o_prob * scale) 
+                
             self.grid = [] # create with an empty list for the grid or reset the grid
             
             # iteration through each row index
@@ -132,7 +151,9 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
-    land1.fill_random_grid(n_prob=50, h_prob=20, w_prob=20, o_prob=10)
+    land1.fill_random_grid(n_prob=50, o_prob=30)
+    
+    
     
     
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
