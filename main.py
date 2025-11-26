@@ -1,3 +1,6 @@
+import random
+
+
 class Map:     
     """
     Simple 2D world for the robot.
@@ -44,6 +47,49 @@ class Map:
                     row_list.append('N') # append 'N' to the row list
                     
                 self.grid.append(row_list) # append the row list to the grid
+    
+    #--> STEP 2b: Fill the grid with random terrain types
+    
+    def fill_random_grid(self):
+            """
+            Fill the grid with random terrain:
+            - Most cells are 'N'
+            - Some cells 'O' (obstacle)
+            - Some cells 'W' (water)
+            - Some cells 'H' (hill)
+            - Check if start and goal are not obstacles so they are not blocked.
+            """
+            self.grid = [] # create with an empty list for the grid or reset the grid
+            
+            # iteration through each row index
+            for x in range(self.rows):
+                row_list = [] # create an empty list for each row
+                
+                # iteration through each column index
+                for y in range(self.cols):
+                    # choose a random number between 1 and 100
+                    rand_num = random.randint(1, 100)
+                    
+                    #decide terrain type based on random number
+                    # 0-65: N -> 60% chance, 66-80: H -> 15% chance, 
+                    # 81-90: W -> 15%, 91-100: O -> 10% chance
+                    if rand_num <= 65:
+                        terrain_type = 'N'
+                    elif rand_num <= 80:
+                        terrain_type = 'H'
+                    elif rand_num <= 90:
+                        terrain_type = 'W'
+                    else:
+                        terrain_type = 'O'
+                    
+                    row_list.append(terrain_type) # append the terrain type to the current row list
+                    
+                self.grid.append(row_list) # append the row list to the grid
+                
+            # make sure start and goal are not obstacles
+            self.grid[self.start[0]][self.start[1]] = 'N'  # set start position to 'N'
+            self.grid[self.goal[0]][self.goal[1]] = 'N'    # set goal position to 'N'
+  
      
     #--> STEP 3: Print the grid to the console
                
@@ -74,17 +120,17 @@ class Map:
                 
 
 if __name__ == "__main__":
-    print("This is Arslan's Land.")
+    print("Welcome to Arslan's Land." "\n")
 
     land1 = Map(10, 10)
 
     print("Map size:", land1.rows, "x", land1.cols)
     print("Start:", land1.start)
-    print("Goal:", land1.goal)
+    print("Goal:", land1.goal, "\n")
     
 # TESTING FILL GRID METHOD
 
     land1.fill_grid()
 
-    print("\n--- Printing Grid ---")
+    print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()
