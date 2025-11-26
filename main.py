@@ -58,7 +58,7 @@ class Map:
             - Some cells 'W' (water)
             - Some cells 'H' (hill)
             - Check if start and goal are not obstacles so they are not blocked.
-            - Automatically
+            - Automatically balance probabilities if they don’t add up to 100%
             """
             # check that the probability entered by user
             total_prob = n_prob + h_prob + w_prob + o_prob
@@ -90,8 +90,7 @@ class Map:
                     rand_num = random.randint(1, 100)
                     
                     #decide terrain type based on random number
-                    # 0-65: N -> 60% chance, 66-80: H -> 15% chance, 
-                    # 81-90: W -> 15%, 91-100: O -> 10% chance
+                    # check which range the random number falls into 
                     if rand_num <= n_prob:
                         terrain_type = 'N'
                     elif rand_num <= n_prob + h_prob:
@@ -151,7 +150,7 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
-    land1.fill_random_grid(n_prob=50, o_prob=30)
+    land1.fill_random_grid()
     
     
     
