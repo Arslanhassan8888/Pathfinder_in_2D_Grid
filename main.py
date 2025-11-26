@@ -50,7 +50,7 @@ class Map:
     
     #--> STEP 2b: Fill the grid with random terrain types
     
-    def fill_random_grid(self):
+    def fill_random_grid(self, n_prob = 65, h_prob = 15, w_prob = 15, o_prob = 5):
             """
             Fill the grid with random terrain:
             - Most cells are 'N'
@@ -73,11 +73,11 @@ class Map:
                     #decide terrain type based on random number
                     # 0-65: N -> 60% chance, 66-80: H -> 15% chance, 
                     # 81-90: W -> 15%, 91-100: O -> 10% chance
-                    if rand_num <= 65:
+                    if rand_num <= n_prob:
                         terrain_type = 'N'
-                    elif rand_num <= 80:
+                    elif rand_num <= n_prob + h_prob:
                         terrain_type = 'H'
-                    elif rand_num <= 90:
+                    elif rand_num <= n_prob + h_prob + w_prob:
                         terrain_type = 'W'
                     else:
                         terrain_type = 'O'
@@ -132,6 +132,8 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
-    land1.fill_random_grid()
+    land1.fill_random_grid(n_prob=50, h_prob=20, w_prob=20, o_prob=10)
+    
+    
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
-    land1.print_grid()
+    land1.print_grid()  
