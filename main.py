@@ -132,5 +132,6 @@ if __name__ == "__main__":
 
     land1.fill_grid()
 
+    land1.fill_random_grid()
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()
