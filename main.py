@@ -212,6 +212,34 @@ class Map:
             moves.append((x, y + 1))
 
         return moves
+    
+    
+    #--> STEP 7: Calculate movement cost for a position
+
+    def move_cost(self, x, y):
+        """
+        Return the movement cost of entering the cell (x, y).
+        Costs:
+            N = 1 (normal terrain)
+            H = 3 (hill)
+            W = 5 (water)
+            O = obstacle (very high cost so robot never enters)
+        """
+
+        # get the terrain type at this position
+        terrain = self.grid[x][y]
+
+        # check the terrain and return the cost
+        if terrain == 'N':
+            return 1  # normal ground, easy to walk
+        elif terrain == 'H':
+            return 3  # hills are harder to climb
+        elif terrain == 'W':
+            return 5  # water or mud is very slow
+        else:
+            # For 'O' (obstacle) or any unknown symbol
+            # we return infinite cost, which means "do not go here".
+            return float('inf')
 
 
 
@@ -239,6 +267,6 @@ if __name__ == "__main__":
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()  
     
-    print(land1.find_moves(0, 0))
-    print(land1.find_moves(5, 5))
-    print(land1.find_moves(9, 9))
+    x, y = 2, 2
+    print(f"\nTerrain at ({x}, {y}):", land1.grid[x][y])
+    print("Move cost for that terrain:", land1.move_cost(x, y))
