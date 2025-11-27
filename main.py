@@ -181,7 +181,37 @@ class Map:
 
         # Otherwise the cell is free to move into
         return False
+    
+    
+    
+    #--> STEP 6: Find valid moves from a position
         
+    def find_moves(self, x, y):
+        """
+        This function finds valid moves from position (x, y), which is a cell in the grid and also check 
+        for obstacles.
+        Return a list of valid move positions (up, down, left, right).
+        """
+
+        moves = []  # list to return
+
+        # UP → (x - 1, y) 
+        if self.in_bounds(x - 1, y) and not self.check_obstacle(x - 1, y):
+            moves.append((x - 1, y))
+
+        # DOWN → (x + 1, y)
+        if self.in_bounds(x + 1, y) and not self.check_obstacle(x + 1, y):
+            moves.append((x + 1, y))
+
+        # LEFT → (x, y - 1)
+        if self.in_bounds(x, y - 1) and not self.check_obstacle(x, y - 1):
+            moves.append((x, y - 1))
+
+        # RIGHT → (x, y + 1)
+        if self.in_bounds(x, y + 1) and not self.check_obstacle(x, y + 1):
+            moves.append((x, y + 1))
+
+        return moves
 
 
 
@@ -209,6 +239,6 @@ if __name__ == "__main__":
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()  
     
-    print(land1.check_obstacle(0, 0))
-    print(land1.check_obstacle(5, 5))
-    print(land1.check_obstacle(10, 10))
+    print(land1.find_moves(0, 0))
+    print(land1.find_moves(5, 5))
+    print(land1.find_moves(9, 9))
