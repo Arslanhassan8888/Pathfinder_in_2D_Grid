@@ -135,8 +135,60 @@ class Map:
                         print(self.grid[x][y], end=' ')
                         
                 print()  # new line after each row
-             
-                
+      
+      
+    #--> STEP 4: Check if a position is inside the grid boundaries       
+    def in_bounds(self, x, y):
+        """
+        Check if the position (x, y) is inside the grid. 
+        Return True if it is inside or False it is outside.
+        This is a helper function, don't need to call as object.method().
+        """
+        #checking the boundaries
+        #check if x is less than 0 (above the top of the grid)
+        if x < 0:
+            return False
+        #check if y is less than 0 (left of the grid)
+        if y < 0:
+            return False
+        #check if x is greater than or equal to the last row index(below the bottom of the grid)
+        if x >= self.rows:
+            return False
+        #check if y is greater than or equal to the last column index(right of the grid)
+        if y >= self.cols:
+            return False
+        # if all checks passed, it is inside the grid
+        return True       
+    
+    #--> STEP 5: Check if a position is an obstacle or free    
+    
+    def check_obstacle(self, x, y):
+        """
+        Check if the cell (x, y) is an obstacle or outside the grid.
+        Return True if it is blocked (obstacle or outside).
+        Return False if it is free (walkable terrain).
+        This is also a helper function, don't need to call as object.method().
+        
+        """
+
+        # First check if the position is outside the grid boundaries
+        if not self.in_bounds(x, y):
+            return True   # outside = which is also an obstacle for pathfinding logic
+
+        # Now check if the terrain at this cell is an obstacle 'O'
+        if self.grid[x][y] == 'O':
+            return True   # actual obstacle
+
+        # Otherwise the cell is free to move into
+        return False
+        
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
     print("Welcome to Arslan's Land." "\n")
@@ -154,7 +206,9 @@ if __name__ == "__main__":
     land1.fill_random_grid( n_prob=60, h_prob=20, w_prob=10, o_prob=20)
     
     
-    
-    
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()  
+    
+    print(land1.check_obstacle(0, 0))
+    print(land1.check_obstacle(5, 5))
+    print(land1.check_obstacle(10, 10))
