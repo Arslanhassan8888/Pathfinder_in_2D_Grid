@@ -231,11 +231,11 @@ class Map:
 
         # check the terrain and return the cost
         if terrain == 'N':
-            return 1  # normal ground, easy to walk
+            return 1  # normal ground, easy to walk, cost 1
         elif terrain == 'H':
-            return 3  # hills are harder to climb
+            return 3  # hills are harder to climb, cost 3
         elif terrain == 'W':
-            return 5  # water or mud is very slow
+            return 5  # water is very slow, cost 5
         else:
             # For 'O' (obstacle) or any unknown symbol
             # we return infinite cost, which means "do not go here".
@@ -244,12 +244,75 @@ class Map:
 
 
 
+    def bfs(self):
+        """
+        BFS(breadth first search) algorithm pathfinder.
+        Finds a path from start to goal.
+        Returns path as a list of (x, y) or None if no path.
+        """
+        
+        # Import deque for efficient queue operations, deque allows O(1) time complexity for appending and popping from both ends
+        # It use FIFO (first in first out) principle. BFS, allows fast .append() (add to end) and .popleft() (remove from front)
+        # from collections import deque
+        # Colletion is a built-in module in Python (built in libary) that containn special data structures like deque, that are more efficient than standard lists or dictionary for certain operations.
+        from collections import deque
+        
+        queue = deque() # initialize empty queue
+        queue.append(self.start) # add starting position to the queue (0,0)
+
+        # this is a dictionary, store where we came from for each position
+        # key = position (x, y), value = previous position (x, y)
+        parent = {self.start: None}   
+        
+        while queue: # this loop will run until the queue is empty
+            
+            row, col = queue.popleft()
+
+            # goal reached → stop early
+            if (row, col) == self.goal:
+                break
+
+            # check all four directions
+            for next_row, next_col in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
+                
+                # skip if outside grid OR obstacle
+                if not self.in_bounds(next_row, next_col):
+                    continue
+                if self.check_obstacle(next_row, next_col):
+                    continue
+
+                # skip if already visited
+                if (next_row, next_col) in parent:
+                    continue
+
+                # mark where we came from & add to queue
+                child = (next_row, next_col)
+                parent_cell = (row, col)
+                parent[child] = parent_cell
+
+                queue.append(child)
+
+        # if we never reached goal
+        if self.goal not in parent:
+            return None
+
+        # rebuild path from goal → back to start
+        path = []
+        current = self.goal
+        while current is not None:
+            path.append(current)
+            current = parent[current]
+
+        path.reverse()
+        return path
+
+
 
 
 
 
 if __name__ == "__main__":
-    print("Welcome to Arslan's Land." "\n")
+    print("Welcome to Arslan's Land.\n")
 
     land1 = Map(10, 10)
 
@@ -257,16 +320,22 @@ if __name__ == "__main__":
     print("Start:", land1.start)
     print("Goal:", land1.goal, "\n")
     
-# TESTING FILL GRID METHOD
-
+    # TESTING FILL GRID METHOD
     land1.fill_grid()
-
-    land1.fill_random_grid( n_prob=60, h_prob=20, w_prob=10, o_prob=20)
-    
+    land1.fill_random_grid(n_prob=60, h_prob=20, w_prob=10, o_prob=20)
     
     print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     land1.print_grid()  
     
-    x, y = 2, 2
-    print(f"\nTerrain at ({x}, {y}):", land1.grid[x][y])
-    print("Move cost for that terrain:", land1.move_cost(x, y))
+ 
+
+    # test BFS
+    print("\nTest BFS\n")
+    path = land1.bfs()
+
+    if path is None:
+        print("No path found from start to goal.")
+    else:
+        print("Path found:")
+        print(path)
+        print("Path length:", len(path))
