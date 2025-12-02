@@ -12,7 +12,6 @@ class Map:
     """
     
     # -->STEP 1: Initialize the map with rows and columns
-    
     def __init__(self, rows, cols): # self refer to the object being created, in this case the l object.
         # number of rows and columns
         self.rows = rows
@@ -31,7 +30,6 @@ class Map:
         self.goal = (rows - 1, cols - 1) 
         
     #--> STEP 2: Fill the grid with normal terrain 'N'
-
     def fill_grid(self):
             """
             Fill the grid with only normal terrain 'N'.
@@ -49,7 +47,6 @@ class Map:
                 self.grid.append(row_list) # append the row list to the grid
     
     #--> STEP 2b: Fill the grid with random terrain types
-    
     def fill_random_grid(self, n_prob = 65, h_prob = 15, w_prob = 10, o_prob = 10):
             """
             Fill the grid with random terrain:
@@ -111,7 +108,6 @@ class Map:
   
      
     #--> STEP 3: Print the grid to the console
-               
     def print_grid(self):
             """
             Print the grid to the console.
@@ -161,7 +157,6 @@ class Map:
         return True       
     
     #--> STEP 5: Check if a position is an obstacle or free    
-    
     def check_obstacle(self, x, y):
         """
         Check if the cell (x, y) is an obstacle or outside the grid.
@@ -185,7 +180,6 @@ class Map:
     
     
     #--> STEP 6: Find valid moves from a position
-        
     def find_moves(self, x, y):
         """
         This function finds valid moves from position (x, y), which is a cell in the grid and also check 
@@ -215,7 +209,6 @@ class Map:
     
     
     #--> STEP 7: Calculate movement cost for a position
-
     def move_cost(self, x, y):
         """
         Return the movement cost of entering the cell (x, y).
@@ -307,86 +300,190 @@ class Map:
     #     return path
 
 
-    def dijkstra(self):
-        """
-        Dijkstra's Algorithm pathfinder.
-        Finds the lowest-cost path from start to goal, considering terrain costs.
-        Returns path as a list of (x, y) or None if no path.
-        """
-        # heapq module provides an implementation of the heap queue algorithm, also known as the priority queue algorithm (min-heap).
-        import heapq  
+    # def dijkstra(self):
+    #     """
+    #     Dijkstra's Algorithm pathfinder.
+    #     Finds the lowest-cost path from start to goal, considering terrain costs.
+    #     Returns path as a list of (x, y) or None if no path.
+    #     """
+    #     # heapq module provides an implementation of the heap queue algorithm, also known as the priority queue algorithm (min-heap).
+    #     import heapq  
 
-        # shorthand for start and goal positions which tuple with (row, col index)
+    #     # shorthand for start and goal positions which tuple with (row, col index)
+    #     start = self.start
+    #     goal = self.goal
+
+    #     # Priority queue: stores (cost, position)
+    #     # crete an empty list for the heap
+    #     #by default, we start with cost 0 at the starting position
+    #     priority_queue = []
+        
+    #     heapq.heappush(priority_queue, (0, start)) #cost and position
+
+    #     # Cost from start to each cell so far
+    #     #it also help me to track visited cells with their lowest cost found, and update if a cheaper path is found
+    #     # key in the dictionary is position (row, col), value is cost from start to that position
+    #     cost_so_far = {start: 0}
+
+    #     # Store where we came from, which will be used to rebuild the path
+    #     parent = {start: None}
+
+
+    #     # loop until there are no more cells to process
+    #     while priority_queue:
+    #         # Get cell with lowest cost so far
+    #         current_cost, (row, col) = heapq.heappop(priority_queue)
+
+    #         # Skip this cell if we already found a cheaper way to reach it
+    #         if current_cost > cost_so_far[(row, col)]:
+    #             continue
+
+    #         # Stop if goal is reached
+    #         if (row, col) == goal:
+    #             break
+
+    #         # Check all 4 possible moves
+    #         for next_row, next_col in [
+    #             (row - 1, col), (row + 1, col),
+    #             (row, col - 1), (row, col + 1)
+    #         ]:
+
+    #             # Skip invalid cells
+    #             if not self.in_bounds(next_row, next_col):
+    #                 continue
+    #             if self.check_obstacle(next_row, next_col):
+    #                 continue
+
+    #             # Calculate new cost for this move, remeber costs not
+    #             # I am referring to value  of yhe key in the dictionary (example position(0,0) values 0)+ the cost to enter the next cell
+    #             # move cost is using  as refernce the coordinate  of the next cell
+    #             new_cost = cost_so_far[(row, col)] + self.move_cost(next_row, next_col)
+
+    #             # if this path doesn't exist yet OR is ezxist but is cheaper than previous cost
+    #             if (next_row, next_col) not in cost_so_far or new_cost < cost_so_far[(next_row, next_col)]:
+    #                 cost_so_far[(next_row, next_col)] = new_cost  # update or save the cost 
+    #                 parent[(next_row, next_col)] = (row, col) # record where we came from, first part is child, second part is parent
+
+    #                 # Add to heap with priority based on new cost
+    #                 heapq.heappush(priority_queue, (new_cost, (next_row, next_col)))
+
+    #     # If goal never reached
+    #     if goal not in parent:
+    #         print("\nNo valid path found — the goal is unreachable due to obstacles or blocked terrain.")
+    #         return None
+
+    #     # Rebuild path
+    #     path = []
+    #     current = goal
+    #     #loop until we reach the start position, which parent is None
+    #     while current is not None:
+    #         path.append(current)
+    #         current = parent[current]
+    #     path.reverse()
+    #     return path
+
+    #--> STEP 8: Heuristic function for A* algorithm
+    def heuristic(self, x, y): #this function takes in the current position (x, y) , this value wiill came from the A* algorithm
+        """
+        Heuristic function for A*.
+        It estimates how far (x, y) is from the goal using
+        Manhattan distance (only up, down, left, right moves).
+
+        h(x, y) = |x - goal_x| + |y - goal_y|
+        """
+
+        # goal position (row, col)
+        # self.goal is a tuple (goal_row, goal_col)
+        goal_x, goal_y = self.goal
+
+        # Manhattan distance = horizontal distance + vertical distance
+        #abs is absolute value function, which gives the positive distance between two values
+        distance = abs(x - goal_x) + abs(y - goal_y)
+
+        # return the estimated distance, which is the heuristic value
+        return distance
+
+    #--> STEP 9: A* Algorithm implementation
+    def a_star(self):
+        """
+        A* (A-star) Algorithm pathfinder.
+        Finds the lowest-cost path from start to goal,
+        using both real movement cost and estimated (heuristic) cost.
+        Returns path as a list of (x, y) or None if no path is found.
+        """
+
+        import heapq  # we use heapq for the priority queue (min-heap)
+
+        # shorthand for start and goal positions which are tuples (row, col index)
         start = self.start
         goal = self.goal
 
-        # Priority queue: stores (cost, position)
-        # crete an empty list for the heap
-        #by default, we start with cost 0 at the starting position
+        # Priority queue: stores (priority, position)
+        # Here priority = cost_so_far + heuristic
         priority_queue = []
-        heapq.heappush(priority_queue, (0, start)) #cost and position
+        heapq.heappush(priority_queue, (0, start))  # start has priority 0 at the beginning
 
-        # Cost from start to each cell so far
-        #it also help me to track visited cells with their lowest cost found, and update if a cheaper path is found
-        # key in the dictionary is position (row, col), value is cost from start to that position
+        # Track cost from start to each cell (like in Dijkstra)
         cost_so_far = {start: 0}
 
-        # Store where we came from, which will be used to rebuild the path
+        # Store parent cell for reconstructing path later
         parent = {start: None}
 
-
-        # loop until there are no more cells to process
         while priority_queue:
-            # Get cell with lowest cost so far
-            current_cost, (row, col) = heapq.heappop(priority_queue)
+            # Get the cell with the lowest total estimated cost (f = g + h)
+            current_priority, (row, col) = heapq.heappop(priority_queue)
 
-            # Skip this cell if we already found a cheaper way to reach it
-            if current_cost > cost_so_far[(row, col)]:
+            # Skip if this is an outdated entry with higher cost
+            if current_priority > cost_so_far[(row, col)] + self.heuristic(row, col):
                 continue
 
-            # Stop if goal is reached
+            # Stop if we reached the goal
             if (row, col) == goal:
                 break
 
-            # Check all 4 possible moves
+            # Explore all 4 possible movements (up, down, left, right)
             for next_row, next_col in [
                 (row - 1, col), (row + 1, col),
                 (row, col - 1), (row, col + 1)
             ]:
 
-                # Skip invalid cells
+                # Skip if cell is outside the grid or blocked
                 if not self.in_bounds(next_row, next_col):
                     continue
                 if self.check_obstacle(next_row, next_col):
                     continue
 
-                # Calculate new cost for this move, remeber costs not
-                # I am referring to value  of yhe key in the dictionary (example position(0,0) values 0)+ the cost to enter the next cell
-                # move cost is using  as refernce the coordinate  of the next cell
+                # Step cost = cost from current cell + cost to move into next cell
                 new_cost = cost_so_far[(row, col)] + self.move_cost(next_row, next_col)
 
-                # if this path doesn't exist yet OR is ezxist but is cheaper than previous cost
+                # If we haven't visited next cell OR found a cheaper path to it
                 if (next_row, next_col) not in cost_so_far or new_cost < cost_so_far[(next_row, next_col)]:
-                    cost_so_far[(next_row, next_col)] = new_cost  # update or save the cost 
-                    parent[(next_row, next_col)] = (row, col) # record where we came from, first part is child, second part is parent
+                    cost_so_far[(next_row, next_col)] = new_cost
+                    parent[(next_row, next_col)] = (row, col)
 
-                    # Add to heap with priority based on new cost
-                    heapq.heappush(priority_queue, (new_cost, (next_row, next_col)))
+                    # f = g + h (actual cost so far + estimated cost to goal)
+                    priority = new_cost + self.heuristic(next_row, next_col)
+
+                    # Add to heap with its priority
+                    heapq.heappush(priority_queue, (priority, (next_row, next_col)))
 
         # If goal never reached
         if goal not in parent:
             print("\nNo valid path found — the goal is unreachable due to obstacles or blocked terrain.")
             return None
 
-        # Rebuild path
+        # Rebuild the final path from goal back to start
         path = []
         current = goal
-        #loop until we reach the start position, which parent is None
+        #loop until we reach the start position, which parent is Non
         while current is not None:
             path.append(current)
             current = parent[current]
+
         path.reverse()
         return path
+
+
 
 
 
@@ -421,9 +518,18 @@ if __name__ == "__main__":
     #     print(path)
     #     print("Path length:", len(path))
 
-    path = land1.dijkstra()
+    # path = land1.dijkstra()
+    # if path:
+    #     print("\nPath found:")
+    #     print(path)
+    #     print("\nPath length:", len(path))
+    #     print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
+    
+    print("\nTest A* Algorithm\n")
+    path = land1.a_star()
+    
     if path:
-        print("\nPath found:")
+        print("Path found:")
         print(path)
         print("\nPath length:", len(path))
         print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
