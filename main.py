@@ -244,68 +244,149 @@ class Map:
 
 
 
-    def bfs(self):
+    # def bfs(self):
+    #     """
+    #     BFS(breadth first search) algorithm pathfinder.
+    #     Finds a path from start to goal.
+    #     Returns path as a list of (x, y) or None if no path.
+    #     """
+        
+    #     # Import deque for efficient queue operations, deque allows O(1) time complexity for appending and popping from both ends
+    #     # It use FIFO (first in first out) principle. BFS, allows fast .append() (add to end) and .popleft() (remove from front)
+    #     # from collections import deque
+    #     # Colletion is a built-in module in Python (built in libary) that containn special data structures like deque, that are more efficient than standard lists or dictionary for certain operations.
+    #     from collections import deque
+        
+    #     queue = deque() # initialize empty queue
+    #     queue.append(self.start) # add starting position to the queue (0,0)
+
+    #     # this is a dictionary, store where we came from for each position
+    #     # key = position (x, y), value = previous position (x, y)
+    #     parent = {self.start: None}   
+        
+    #     while queue: # this loop will run until the queue is empty
+            
+    #         row, col = queue.popleft()
+
+    #         # goal reached → stop early
+    #         if (row, col) == self.goal:
+    #             break
+
+    #         # check all four directions
+    #         for next_row, next_col in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
+                
+    #             # skip if outside grid OR obstacle
+    #             if not self.in_bounds(next_row, next_col):
+    #                 continue
+    #             if self.check_obstacle(next_row, next_col):
+    #                 continue
+
+    #             # skip if already visited
+    #             if (next_row, next_col) in parent:
+    #                 continue
+
+    #             # mark where we came from & add to queue
+    #             child = (next_row, next_col)
+    #             parent_cell = (row, col)
+    #             parent[child] = parent_cell
+
+    #             queue.append(child)
+
+    #     # if we never reached goal
+    #     if self.goal not in parent:
+    #         return None
+
+    #     # rebuild path from goal → back to start
+    #     path = []
+    #     current = self.goal
+    #     while current is not None:
+    #         path.append(current)
+    #         current = parent[current]
+
+    #     path.reverse()
+    #     return path
+
+
+    def dijkstra(self):
         """
-        BFS(breadth first search) algorithm pathfinder.
-        Finds a path from start to goal.
+        Dijkstra's Algorithm pathfinder.
+        Finds the lowest-cost path from start to goal, considering terrain costs.
         Returns path as a list of (x, y) or None if no path.
         """
-        
-        # Import deque for efficient queue operations, deque allows O(1) time complexity for appending and popping from both ends
-        # It use FIFO (first in first out) principle. BFS, allows fast .append() (add to end) and .popleft() (remove from front)
-        # from collections import deque
-        # Colletion is a built-in module in Python (built in libary) that containn special data structures like deque, that are more efficient than standard lists or dictionary for certain operations.
-        from collections import deque
-        
-        queue = deque() # initialize empty queue
-        queue.append(self.start) # add starting position to the queue (0,0)
+        # heapq module provides an implementation of the heap queue algorithm, also known as the priority queue algorithm (min-heap).
+        import heapq  
 
-        # this is a dictionary, store where we came from for each position
-        # key = position (x, y), value = previous position (x, y)
-        parent = {self.start: None}   
-        
-        while queue: # this loop will run until the queue is empty
-            
-            row, col = queue.popleft()
+        # shorthand for start and goal positions which tuple with (row, col index)
+        start = self.start
+        goal = self.goal
 
-            # goal reached → stop early
-            if (row, col) == self.goal:
+        # Priority queue: stores (cost, position)
+        # crete an empty list for the heap
+        #by default, we start with cost 0 at the starting position
+        priority_queue = []
+        heapq.heappush(priority_queue, (0, start)) #cost and position
+
+        # Cost from start to each cell so far
+        #it also help me to track visited cells with their lowest cost found, and update if a cheaper path is found
+        # key in the dictionary is position (row, col), value is cost from start to that position
+        cost_so_far = {start: 0}
+
+        # Store where we came from, which will be used to rebuild the path
+        parent = {start: None}
+
+
+        # loop until there are no more cells to process
+        while priority_queue:
+            # Get cell with lowest cost so far
+            current_cost, (row, col) = heapq.heappop(priority_queue)
+
+            # Skip this cell if we already found a cheaper way to reach it
+            if current_cost > cost_so_far[(row, col)]:
+                continue
+
+            # Stop if goal is reached
+            if (row, col) == goal:
                 break
 
-            # check all four directions
-            for next_row, next_col in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
-                
-                # skip if outside grid OR obstacle
+            # Check all 4 possible moves
+            for next_row, next_col in [
+                (row - 1, col), (row + 1, col),
+                (row, col - 1), (row, col + 1)
+            ]:
+
+                # Skip invalid cells
                 if not self.in_bounds(next_row, next_col):
                     continue
                 if self.check_obstacle(next_row, next_col):
                     continue
 
-                # skip if already visited
-                if (next_row, next_col) in parent:
-                    continue
+                # Calculate new cost for this move, remeber costs not
+                # I am referring to value  of yhe key in the dictionary (example position(0,0) values 0)+ the cost to enter the next cell
+                # move cost is using  as refernce the coordinate  of the next cell
+                new_cost = cost_so_far[(row, col)] + self.move_cost(next_row, next_col)
 
-                # mark where we came from & add to queue
-                child = (next_row, next_col)
-                parent_cell = (row, col)
-                parent[child] = parent_cell
+                # if this path doesn't exist yet OR is ezxist but is cheaper than previous cost
+                if (next_row, next_col) not in cost_so_far or new_cost < cost_so_far[(next_row, next_col)]:
+                    cost_so_far[(next_row, next_col)] = new_cost  # update or save the cost 
+                    parent[(next_row, next_col)] = (row, col) # record where we came from, first part is child, second part is parent
 
-                queue.append(child)
+                    # Add to heap with priority based on new cost
+                    heapq.heappush(priority_queue, (new_cost, (next_row, next_col)))
 
-        # if we never reached goal
-        if self.goal not in parent:
+        # If goal never reached
+        if goal not in parent:
+            print("\nNo valid path found — the goal is unreachable due to obstacles or blocked terrain.")
             return None
 
-        # rebuild path from goal → back to start
+        # Rebuild path
         path = []
-        current = self.goal
+        current = goal
+        #loop until we reach the start position, which parent is None
         while current is not None:
             path.append(current)
             current = parent[current]
-
         path.reverse()
         return path
-
 
 
 
@@ -329,13 +410,20 @@ if __name__ == "__main__":
     
  
 
-    # test BFS
-    print("\nTest BFS\n")
-    path = land1.bfs()
+    # # test BFS
+    # print("\nTest BFS\n")
+    # path = land1.bfs()
 
-    if path is None:
-        print("No path found from start to goal.")
-    else:
-        print("Path found:")
+    # if path is None:
+    #     print("No path found from start to goal.")
+    # else:
+    #     print("Path found:")
+    #     print(path)
+    #     print("Path length:", len(path))
+
+    path = land1.dijkstra()
+    if path:
+        print("\nPath found:")
         print(path)
-        print("Path length:", len(path))
+        print("\nPath length:", len(path))
+        print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
