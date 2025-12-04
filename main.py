@@ -448,7 +448,7 @@ class Map:
         return distance
 
     #--> STEP 9: A* Algorithm implementation
-    def a_star(self):
+    def a_star(self, weight= 1.0):
         """
         A* (A-star) Algorithm pathfinder.
         Finds the lowest-cost path from start to goal,
@@ -506,7 +506,7 @@ class Map:
                     parent[(next_row, next_col)] = (row, col)
 
                     # f = g + h (actual cost so far + estimated cost to goal)
-                    priority = new_cost + self.heuristic(next_row, next_col)
+                    priority = new_cost + weight *self.heuristic(next_row, next_col)
 
                     # Add to heap with its priority
                     heapq.heappush(priority_queue, (priority, (next_row, next_col)))
@@ -566,15 +566,13 @@ if __name__ == "__main__":
     land1.print_grid()
 
     print("\nRunning A* Algorithm...\n")
-    path = land1.a_star()
+    path = land1.a_star(weight=1.0)
 
     if path:
         print("\nRobot movement animation:\n")
         land1.animate_path(path, delay=1.0)
 
-        # =============================
-        # FINAL SUMMARY AFTER ANIMATION
-        # =============================
+
         print("\n===== FINAL RESULTS =====\n")
         print(f"Map size used: {land1.rows} x {land1.cols}")
         print(f"Start: {land1.start}")
