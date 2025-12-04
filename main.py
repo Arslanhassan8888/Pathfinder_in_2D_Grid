@@ -1,4 +1,12 @@
 import random
+# ANSI color codes
+GREEN = "\033[92m"
+RED = "\033[91m"
+YELLOW = "\033[93m"
+BLUE = "\033[94m"
+MAGENTA = "\033[95m"
+WHITE = "\033[97m"
+RESET = "\033[0m"
 
 
 class Map:     
@@ -96,7 +104,7 @@ class Map:
                     elif rand_num <= n_prob + h_prob + w_prob:
                         terrain_type = 'W'
                     else:
-                        terrain_type = 'O'
+                        terrain_type = f"{RED}O{RESET}"
                     
                     row_list.append(terrain_type) # append the terrain type to the current row list
                     
@@ -131,6 +139,42 @@ class Map:
                         print(self.grid[x][y], end=' ')
                         
                 print()  # new line after each row
+                
+    def animate_path(self, path, delay=0.3):
+        """
+        Animate robot movement step-by-step.
+        Shows:
+        🤖 = robot current position
+        * = path already visited
+        """
+        import time
+
+        visited = set()  # will store travelled cells
+
+        for step in path:
+            x_pos, y_pos = step
+            visited.add(step)  # mark current position as visited
+
+            print("\n====================")
+            print(" Robot step:", step)
+            print("====================")
+
+            for x in range(self.rows):
+                for y in range(self.cols):
+                    if (x, y) == self.start:
+                        print(f"{YELLOW}S{RESET}", end=" ")
+                    elif (x, y) == self.goal:
+                        print(f"{MAGENTA}G{RESET}", end=" ")
+                    elif (x, y) == (x_pos, y_pos):
+                        print("🤖", end=" ")
+                    elif (x, y) in visited:
+                        print(f"{GREEN}*{RESET}", end=" ")
+                    else:
+                        print(self.grid[x][y], end=" ")
+                print()  # move to next line after each row
+
+            time.sleep(delay)
+
       
       
     #--> STEP 4: Check if a position is inside the grid boundaries       
@@ -171,7 +215,7 @@ class Map:
             return True   # outside = which is also an obstacle for pathfinding logic
 
         # Now check if the terrain at this cell is an obstacle 'O'
-        if self.grid[x][y] == 'O':
+        if 'O' in self.grid[x][y]:
             return True   # actual obstacle
 
         # Otherwise the cell is free to move into
@@ -487,24 +531,6 @@ class Map:
 
 
 
-
-
-if __name__ == "__main__":
-    print("Welcome to Arslan's Land.\n")
-
-    land1 = Map(10, 10)
-
-    print("Map size:", land1.rows, "x", land1.cols)
-    print("Start:", land1.start)
-    print("Goal:", land1.goal, "\n")
-    
-    # TESTING FILL GRID METHOD
-    land1.fill_grid()
-    land1.fill_random_grid(n_prob=60, h_prob=20, w_prob=10, o_prob=20)
-    
-    print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
-    land1.print_grid()  
-    
  
 
     # # test BFS
@@ -525,11 +551,41 @@ if __name__ == "__main__":
     #     print("\nPath length:", len(path))
     #     print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
     
-    print("\nTest A* Algorithm\n")
+if __name__ == "__main__":
+    print("Welcome to Arslan's Land.\n")
+
+    land1 = Map(10, 10)
+
+    # Generate map
+    land1.fill_grid()
+    land1.fill_random_grid(n_prob=60, h_prob=20, w_prob=10, o_prob=20)
+
+    print("Legend: N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
+
+    print("Generated Map:\n")
+    land1.print_grid()
+
+    print("\nRunning A* Algorithm...\n")
     path = land1.a_star()
-    
+
     if path:
+        print("\nRobot movement animation:\n")
+        land1.animate_path(path, delay=1.0)
+
+        # =============================
+        # FINAL SUMMARY AFTER ANIMATION
+        # =============================
+        print("\n===== FINAL RESULTS =====\n")
+        print(f"Map size used: {land1.rows} x {land1.cols}")
+        print(f"Start: {land1.start}")
+        print(f"Goal: {land1.goal}\n")
+
+        print("Tested A* Algorithm\n")
         print("Path found:")
         print(path)
-        print("\nPath length:", len(path))
-        print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
+
+        print(f"\nPath length: {len(path)}")
+        print(f"Total movement cost: {sum(land1.move_cost(x, y) for x, y in path)}")
+
+    else:
+        print("\nNo path could be found — goal is unreachable due to obstacles.")
