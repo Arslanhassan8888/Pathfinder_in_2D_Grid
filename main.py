@@ -1,16 +1,29 @@
+"""
+Main program for running the weighted A* pathfinding simulation.
+
+This script handles:
+- User input (map size, terrain probabilities, heuristic weight)
+- Grid generation
+- Execution of the weighted A* algorithm
+- Displaying results and optional re-planning when obstacles are added
+
+"""
+
 from mapword import Map
 
-
+# ANSI color codes for terminal text formatting
 YELLOW = "\033[93m"
 RED = "\033[91m"
 GREEN = "\033[92m"
 RESET = "\033[0m"
 
 if __name__ == "__main__":
+    # Display welcome message and the purpose of the simulation
     print(f"\n{YELLOW}WELCOME TO ARSLAN'S LAND — PATHFINDING ADVENTURE{RESET} \n")
     print(f"{GREEN}This simulation lets you explore how a robot navigates a grid world using the A* algorithm!{RESET}\n")
     
     # CHOOSE GRID SIZE
+    # Get user input for map dimensions
     print(f"{YELLOW}--- Map Size Setup ---{RESET}")
     while True:
         try:
@@ -26,6 +39,7 @@ if __name__ == "__main__":
     land1 = Map(rows, cols)
 
     # TERRAIN RANDOMISATION SETUP
+    # The user can choose default or custom probabilities for terrain types
     print(f"\n{YELLOW}--- Terrain Randomization Setup ---{RESET}")
     print("Enter probabilities for each terrain type (should be total 100).")
     print("Type 'd' to apply default values or 'c' to customise.")
@@ -63,16 +77,18 @@ if __name__ == "__main__":
         except ValueError:
             print(f"{RED}Error! Please enter valid integer numbers. Try again.{RESET}\n")
 
-    # Generate the terrain map
+    # GENERATE THE GRID
     land1.fill_grid()
     land1.fill_random_grid(n_prob, h_prob, w_prob, o_prob)
 
+    # DISPLAY THE GENERATED MAP
     print(f"\n{YELLOW}Legend:{RESET} N=Normal, O=Obstacle, W=Water, H=Hill, S=Start, G=Goal\n")
     print(f"{YELLOW}Generated Map:{RESET}\n")
     land1.print_grid()
 
 
     # HEURISTIC WEIGHT MENU
+    # The weight determines how strongly the robot prioritises reaching the goal
     print(f"\n{YELLOW}--- Heuristic Weight Setup ---{RESET}")
     print("The weight determines how strongly the robot prioritises reaching the goal.")
     print("""
@@ -96,6 +112,7 @@ if __name__ == "__main__":
     print(f"\n{YELLOW}Running Weighted A* Algorithm...{RESET}\n")
     path = land1.a_star(weight=weight)
 
+    # ANIMATE THE ROBOT MOVEMENT IF PATH FOUND
     if path:
         input(f"\n{GREEN}Press Enter to start robot animation...{RESET}\n")
         land1.animate_path(path, delay=0.4)
@@ -120,6 +137,7 @@ if __name__ == "__main__":
         
 
     #ADD NEW OBSTACLES & RE-RUN A*
+    # Allow user to add new obstacles and re-run the algorithm
     while True:
         add_obs = input(f"\n{GREEN}Would you like to simulate new unexpected obstacles? (y/n): {RESET}").strip().lower()
         if add_obs == 'y':
@@ -127,14 +145,14 @@ if __name__ == "__main__":
                 x = int(input(f"{GREEN}Enter row index (0 to {land1.rows - 1}): {RESET}"))
                 y = int(input(f"{GREEN}Enter column index (0 to {land1.cols - 1}): {RESET}"))
 
-                # Check validity
+                # Validation of coordinates (within bounds and not on start/goal)
                 if not land1.in_bounds(x, y):
                     print(f"{RED}Error: position out of bounds!{RESET}")
                     continue
                 if (x, y) == land1.start or (x, y) == land1.goal:
                     print(f"{RED}Error: cannot place an obstacle on Start or Goal!{RESET}")
                     continue
-
+                # Place the new obstacle
                 land1.grid[x][y] = f"{RED}O{RESET}"
                 print(f"{YELLOW}New obstacle added at ({x}, {y}).{RESET}")
                 print(f"{YELLOW}Updated Map:{RESET}\n")
@@ -151,6 +169,8 @@ if __name__ == "__main__":
             if new_path:
                 input(f"\n{GREEN}Press Enter to see the robot navigate the new route...{RESET}\n")
                 land1.animate_path(new_path, delay=0.5)
+                
+                # FINAL SUMMARY FOR NEW PATH
                 print(f"\n{GREEN}New path successfully found!{RESET}")
                 print(f"Path length: {len(new_path)}")
                 print(f"Total movement cost: {sum(land1.move_cost(x, y) for x, y in new_path)}\n")

@@ -1,4 +1,15 @@
+"""
+Map and Weighted A* Pathfinding System
+--------------------------------------
+
+This module defines a 2D grid world and implements the weighted A* algorithm
+for pathfinding. It includes grid generation, obstacle handling, terrain cost
+evaluation, and path animation.
+ANSI color codes are used for better console visualization.
+"""
+
 import random
+import heapq  # we use heapq for the priority queue (min-heap)
 import os
 import time
 
@@ -6,24 +17,24 @@ import time
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
-BLUE = "\033[94m"
 MAGENTA = "\033[95m"
-WHITE = "\033[97m"
 RESET = "\033[0m"
-
 
 class Map:     
     """
     Simple 2D world for the robot.
     We will use a grid with:
-      N = normal terrain
-      O = obstacle
-      W = water
-      H = hill
+      N = normal terrain (cost 1)
+      O = obstacle (blocked)
+      W = water (cost 5)
+      H = hill  (cost 3)
+      
+    The map stores start and goal positions, generates random terrain,
+    checks movements, and supports A* pathfinding.
     """
     
     # -->STEP 1: Initialize the map with rows and columns
-    def __init__(self, rows, cols): # self refer to the object being created, in this case the l object.
+    def __init__(self, rows: int, cols:int) -> None: # self refer to the object being created, in this case the l object.
         # number of rows and columns
         self.rows = rows
         self.cols = cols
@@ -58,13 +69,17 @@ class Map:
                 self.grid.append(row_list) # append the row list to the grid
     
     #--> STEP 2b: Fill the grid with random terrain types
-    def fill_random_grid(self, n_prob = 65, h_prob = 15, w_prob = 10, o_prob = 10):
+    def fill_random_grid(self, n_prob: int = 65, 
+                         h_prob:int = 15, 
+                         w_prob:int = 10,
+                         o_prob:int = 10
+                         )-> None:
             """
             Fill the grid with random terrain:
-            - Most cells are 'N'
-            - Some cells 'O' (obstacle)
-            - Some cells 'W' (water)
-            - Some cells 'H' (hill)
+            - Most cells are 'N'- n_prob %
+            - Some cells 'O' (obstacle) - o_prob %
+            - Some cells 'W' (water) - w_prob %
+            - Some cells 'H' (hill) - h_prob %
             - Check if start and goal are not obstacles so they are not blocked.
             - Automatically balance probabilities if they don’t add up to 100%
             """
@@ -119,7 +134,7 @@ class Map:
   
      
     #--> STEP 3: Print the grid to the console
-    def print_grid(self):
+    def print_grid(self) ->None:
             """
             Print the grid to the console.
             Start will be'S' and Goal will be 'G'.
@@ -142,7 +157,8 @@ class Map:
                         print(self.grid[x][y], end=' ')
                         
                 print()  # new line after each row
-    #--> STEP 4b( but step 10 for me): Animate the robot moving along a path         
+                
+    #--> STEP 3b( but step 10 for me): Animate the robot moving along a path         
     def animate_path(self, path, delay=0.3):
         """
         Animate robot movement step-by-step.
@@ -150,11 +166,11 @@ class Map:
         🤖 = robot current position
         * = path already visited
         """
-        visited = set()  # will store travelled cells
+        visited = set()  # will store teh cell already travelled cells
 
         for step in path:
             x_pos, y_pos = step
-            visited.add(step)  # mark current position as visited
+            visited.add(step)  # add the current step to visited set(path)
 
             os.system('cls' if os.name == 'nt' else 'clear')  # clear console for animation effect
             
@@ -181,30 +197,19 @@ class Map:
       
       
     #--> STEP 4: Check if a position is inside the grid boundaries       
-    def in_bounds(self, x, y):
+    def in_bounds(self, x:int, y:int) -> bool:
         """
         Check if the position (x, y) is inside the grid. 
-        Return True if it is inside or False it is outside.
+        Return to boolean values, True if it is inside or False it is outside the grid.
         This is a helper function, don't need to call as object.method().
         """
-        #checking the boundaries
         #check if x is less than 0 (above the top of the grid)
-        if x < 0:
-            return False
-        #check if y is less than 0 (left of the grid)
-        if y < 0:
-            return False
-        #check if x is greater than or equal to the last row index(below the bottom of the grid)
-        if x >= self.rows:
-            return False
-        #check if y is greater than or equal to the last column index(right of the grid)
-        if y >= self.cols:
-            return False
-        # if all checks passed, it is inside the grid
+        if x < 0 or y < 0  or x >= self.rows or y >= self.cols:
+            return False # outside the grid
         return True       
     
     #--> STEP 5: Check if a position is an obstacle or free    
-    def check_obstacle(self, x, y):
+    def check_obstacle(self, x:int, y:int) -> bool:
         """
         Check if the cell (x, y) is an obstacle or outside the grid.
         Return True if it is blocked (obstacle or outside).
@@ -224,10 +229,8 @@ class Map:
         # Otherwise the cell is free to move into
         return False
     
-    
-    
     #--> STEP 6: Find valid moves from a position
-    def find_moves(self, x, y):
+    def find_moves(self, x:int, y:int) -> list:
         """
         This function finds valid moves from position (x, y), which is a cell in the grid and also check 
         for obstacles.
@@ -256,14 +259,11 @@ class Map:
     
     
     #--> STEP 7: Calculate movement cost for a position
-    def move_cost(self, x, y):
+    def move_cost(self, x:int, y:int) -> int:
         """
         Return the movement cost of entering the cell (x, y).
-        Costs:
-            N = 1 (normal terrain)
-            H = 3 (hill)
-            W = 5 (water)
-            O = obstacle (very high cost so robot never enters)
+        x: row index  y: column index
+        Returns: int cost value -> 1 (normal), 3 (hill), 5 (water), inf (obstacle)
         """
 
         # get the terrain type at this position
@@ -271,166 +271,19 @@ class Map:
 
         # check the terrain and return the cost
         if terrain == 'N':
-            return 1  # normal ground, easy to walk, cost 1
+            return 1  
         elif terrain == 'H':
-            return 3  # hills are harder to climb, cost 3
+            return 3 
         elif terrain == 'W':
-            return 5  # water is very slow, cost 5
+            return 5 
         else:
             # For 'O' (obstacle) or any unknown symbol
-            # we return infinite cost, which means "do not go here".
+            # we return infinite cost, which means "do not go there".
             return float('inf')
 
 
-
-
-    # def bfs(self):
-    #     """
-    #     BFS(breadth first search) algorithm pathfinder.
-    #     Finds a path from start to goal.
-    #     Returns path as a list of (x, y) or None if no path.
-    #     """
-        
-    #     # Import deque for efficient queue operations, deque allows O(1) time complexity for appending and popping from both ends
-    #     # It use FIFO (first in first out) principle. BFS, allows fast .append() (add to end) and .popleft() (remove from front)
-    #     # from collections import deque
-    #     # Colletion is a built-in module in Python (built in libary) that containn special data structures like deque, that are more efficient than standard lists or dictionary for certain operations.
-    #     from collections import deque
-        
-    #     queue = deque() # initialize empty queue
-    #     queue.append(self.start) # add starting position to the queue (0,0)
-
-    #     # this is a dictionary, store where we came from for each position
-    #     # key = position (x, y), value = previous position (x, y)
-    #     parent = {self.start: None}   
-        
-    #     while queue: # this loop will run until the queue is empty
-            
-    #         row, col = queue.popleft()
-
-    #         # goal reached → stop early
-    #         if (row, col) == self.goal:
-    #             break
-
-    #         # check all four directions
-    #         for next_row, next_col in [(row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]:
-                
-    #             # skip if outside grid OR obstacle
-    #             if not self.in_bounds(next_row, next_col):
-    #                 continue
-    #             if self.check_obstacle(next_row, next_col):
-    #                 continue
-
-    #             # skip if already visited
-    #             if (next_row, next_col) in parent:
-    #                 continue
-
-    #             # mark where we came from & add to queue
-    #             child = (next_row, next_col)
-    #             parent_cell = (row, col)
-    #             parent[child] = parent_cell
-
-    #             queue.append(child)
-
-    #     # if we never reached goal
-    #     if self.goal not in parent:
-    #         return None
-
-    #     # rebuild path from goal → back to start
-    #     path = []
-    #     current = self.goal
-    #     while current is not None:
-    #         path.append(current)
-    #         current = parent[current]
-
-    #     path.reverse()
-    #     return path
-
-
-    # def dijkstra(self):
-    #     """
-    #     Dijkstra's Algorithm pathfinder.
-    #     Finds the lowest-cost path from start to goal, considering terrain costs.
-    #     Returns path as a list of (x, y) or None if no path.
-    #     """
-    #     # heapq module provides an implementation of the heap queue algorithm, also known as the priority queue algorithm (min-heap).
-    #     import heapq  
-
-    #     # shorthand for start and goal positions which tuple with (row, col index)
-    #     start = self.start
-    #     goal = self.goal
-
-    #     # Priority queue: stores (cost, position)
-    #     # crete an empty list for the heap
-    #     #by default, we start with cost 0 at the starting position
-    #     priority_queue = []
-        
-    #     heapq.heappush(priority_queue, (0, start)) #cost and position
-
-    #     # Cost from start to each cell so far
-    #     #it also help me to track visited cells with their lowest cost found, and update if a cheaper path is found
-    #     # key in the dictionary is position (row, col), value is cost from start to that position
-    #     cost_so_far = {start: 0}
-
-    #     # Store where we came from, which will be used to rebuild the path
-    #     parent = {start: None}
-
-
-    #     # loop until there are no more cells to process
-    #     while priority_queue:
-    #         # Get cell with lowest cost so far
-    #         current_cost, (row, col) = heapq.heappop(priority_queue)
-
-    #         # Skip this cell if we already found a cheaper way to reach it
-    #         if current_cost > cost_so_far[(row, col)]:
-    #             continue
-
-    #         # Stop if goal is reached
-    #         if (row, col) == goal:
-    #             break
-
-    #         # Check all 4 possible moves
-    #         for next_row, next_col in [
-    #             (row - 1, col), (row + 1, col),
-    #             (row, col - 1), (row, col + 1)
-    #         ]:
-
-    #             # Skip invalid cells
-    #             if not self.in_bounds(next_row, next_col):
-    #                 continue
-    #             if self.check_obstacle(next_row, next_col):
-    #                 continue
-
-    #             # Calculate new cost for this move, remeber costs not
-    #             # I am referring to value  of yhe key in the dictionary (example position(0,0) values 0)+ the cost to enter the next cell
-    #             # move cost is using  as refernce the coordinate  of the next cell
-    #             new_cost = cost_so_far[(row, col)] + self.move_cost(next_row, next_col)
-
-    #             # if this path doesn't exist yet OR is ezxist but is cheaper than previous cost
-    #             if (next_row, next_col) not in cost_so_far or new_cost < cost_so_far[(next_row, next_col)]:
-    #                 cost_so_far[(next_row, next_col)] = new_cost  # update or save the cost 
-    #                 parent[(next_row, next_col)] = (row, col) # record where we came from, first part is child, second part is parent
-
-    #                 # Add to heap with priority based on new cost
-    #                 heapq.heappush(priority_queue, (new_cost, (next_row, next_col)))
-
-    #     # If goal never reached
-    #     if goal not in parent:
-    #         print("\nNo valid path found — the goal is unreachable due to obstacles or blocked terrain.")
-    #         return None
-
-    #     # Rebuild path
-    #     path = []
-    #     current = goal
-    #     #loop until we reach the start position, which parent is None
-    #     while current is not None:
-    #         path.append(current)
-    #         current = parent[current]
-    #     path.reverse()
-    #     return path
-
     #--> STEP 8: Heuristic function for A* algorithm
-    def heuristic(self, x, y): #this function takes in the current position (x, y) , this value wiill came from the A* algorithm
+    def heuristic(self, x:int, y:int) ->int: #this function takes in the current position (x, y) , this value wiill came from the A* algorithm
         """
         Heuristic function for A*.
         It estimates how far (x, y) is from the goal using
@@ -451,15 +304,17 @@ class Map:
         return distance
 
     #--> STEP 9: A* Algorithm implementation
-    def a_star(self, weight= 1.0):
+    def a_star(self, weight:float= 1.0) -> list:
         """
         A* (A-star) Algorithm pathfinder.
         Finds the lowest-cost path from start to goal,
-        using both real movement cost and estimated (heuristic) cost.
+        using both real movement cost made so far plus estimated (heuristic) movement cost left.
+         -g(n): actual cost from start to current cell n
+         -h(n): estimated cost from n to goal (heuristic)
+         -weight: heuristic weight. Values > 1 make it greedier (faster but less optimal).
+         -The finl cost is : f(n) = g(n) + weight * h(n)
         Returns path as a list of (x, y) or None if no path is found.
         """
-
-        import heapq  # we use heapq for the priority queue (min-heap)
 
         # shorthand for start and goal positions which are tuples (row, col index)
         start = self.start
@@ -529,28 +384,3 @@ class Map:
 
         path.reverse()
         return path
-
-
-
-
-
- 
-
-    # # test BFS
-    # print("\nTest BFS\n")
-    # path = land1.bfs()
-
-    # if path is None:
-    #     print("No path found from start to goal.")
-    # else:
-    #     print("Path found:")
-    #     print(path)
-    #     print("Path length:", len(path))
-
-    # path = land1.dijkstra()
-    # if path:
-    #     print("\nPath found:")
-    #     print(path)
-    #     print("\nPath length:", len(path))
-    #     print("\nTotal movement cost:", sum(land1.move_cost(x, y) for x, y in path))
-    
