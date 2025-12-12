@@ -24,8 +24,8 @@ Weighted A* algorithm — customise heuristic weight to simulate:
 
 ## Project Structure
 
- - mapworld.py      : Contains the Map class and all algorithms (A*, helpers, animation)
- - main.py          : Handles user input, menus, and overall program control
+ - mapworld.py: Contains the Map class and all algorithms (A*, helpers, animation)
+ - main.py: Handles user input, menus, and overall program control
  - README.md        
 
 ## Weighted A* Algorithm Explained
@@ -37,7 +37,7 @@ Weighted A* adds a heuristic multiplier (w) to the standard A* formula:
 
 ## Key Components
  ### Map class (mapworld.py)
- * Grid geneartion
+ * Grid generation
  * Boundary check
  * Obstacle detection
  * Terrain cost calculation
@@ -56,7 +56,7 @@ Weighted A* adds a heuristic multiplier (w) to the standard A* formula:
 - How heuristics affect performance and accuracy
 - Modular Python design for clarity and maintainability
 
-## Future Improvments
+## Future Improvements
 * Add diagonal movement options
 * Implement GUI (Tkinter or Pygame) for visual display
 * Compare multiple algorithms side by side
